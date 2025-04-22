@@ -1,0 +1,76 @@
+def encrypt(message, cipher):
+    def find_letter(letter):
+        for row in range(5):
+            for col in range(5):
+                if cipher[row][col] == letter:
+                    return row, col
+        return None
+    
+    message = message.upper()
+    message = message.replace('J', 'I')
+    message = ''.join(char for char in message if char.isalpha())
+    
+    prepared_message = []
+    i = 0
+    while i < len(message):
+        if i == len(message) - 1:
+            prepared_message.append(message[i] + 'X')
+            i += 1
+        elif message[i] == message[i + 1]:
+            prepared_message.append(message[i] + 'X')
+            i += 1
+        else:
+            prepared_message.append(message[i:i+2])
+            i += 2
+    
+    encrypted_message = ""
+    for pair in prepared_message:
+        row1, col1 = find_letter(pair[0])
+        row2, col2 = find_letter(pair[1])
+        
+        if row1 != row2 and col1 != col2:
+            encrypted_message += cipher[row1][col2] + cipher[row2][col1]
+        elif row1 == row2:
+            encrypted_message += cipher[row1][(col1 + 1) % 5] + cipher[row2][(col2 + 1) % 5]
+        elif col1 == col2:
+            encrypted_message += cipher[(row1 + 1) % 5][col1] + cipher[(row2 + 1) % 5][col2]
+    
+    return encrypted_message
+
+def decrypt(encrypted_message, cipher):
+    def find_letter(letter):
+        for row in range(5):
+            for col in range(5):
+                if cipher[row][col] == letter:
+                    return row, col
+        return None
+    
+    decrypted_message = ""
+    for i in range(0, len(encrypted_message), 2):
+        pair = encrypted_message[i:i+2]
+        row1, col1 = find_letter(pair[0])
+        row2, col2 = find_letter(pair[1])
+        
+        if row1 != row2 and col1 != col2:
+            decrypted_message += cipher[row1][col2] + cipher[row2][col1]
+        elif row1 == row2:
+            decrypted_message += cipher[row1][(col1 - 1) % 5] + cipher[row2][(col2 - 1) % 5]
+        elif col1 == col2:
+            decrypted_message += cipher[(row1 - 1) % 5][col1] + cipher[(row2 - 1) % 5][col2]
+    
+    return decrypted_message
+
+cipher = (
+    ('D', 'A', 'V', 'I', 'O'),
+    ('Y', 'N', 'E', 'R', 'B'),
+    ('C', 'F', 'G', 'H', 'K'),
+    ('L', 'M', 'P', 'Q', 'S'),
+    ('T', 'U', 'W', 'X', 'Z')
+)
+
+message = "PS. Hello, world"
+encrypted = encrypt(message, cipher)
+print(f"Encrypted: {encrypted}")
+
+decrypted = decrypt(encrypted, cipher)
+print(f"Decrypted: {decrypted}")
